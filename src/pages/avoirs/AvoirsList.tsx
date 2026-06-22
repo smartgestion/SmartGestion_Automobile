@@ -147,6 +147,7 @@ export function AvoirsList() {
         .eq('user_id', String(user.id))
         .maybeSingle();
 
+        
       if (!data) {
         console.log('No parametres found');
         setEntreprise(null);
