@@ -1,0 +1,62 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "SmartGestion",
+  "version": "1.0.0",
+  "identifier": "com.paragestion.desktop",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev:vite",
+    "beforeBuildCommand": "npm run build:vite"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "SmartGestion - Gestion Automobile",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 700,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true,
+        "decorations": true,
+        "transparent": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi"],
+    "publisher": "SmartGestion",
+    "copyright": "Copyright © 2026 SmartGestion. All rights reserved.",
+    "category": "Business",
+    "shortDescription": "Local-first automobile ERP",
+    "longDescription": "SmartGestion is a fully offline automobile ERP that manages clients, suppliers, products, quotes, invoices, credit notes, purchase orders, delivery slips, expenses, walk-in sales and stock movements — all stored in a local SQLite database with bcrypt-hashed user accounts. No cloud, no internet connection required.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "displayLanguageSelector": true,
+        "installerIcon": "icons/icon.ico",
+        "installMode": "perMachine",
+        "languages": ["English", "French", "Arabic"]
+      },
+      "wix": {
+        "language": ["en-US", "fr-FR"]
+      }
+    },
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  }
+}

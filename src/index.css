@@ -1,0 +1,883 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Inter Variable', sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+
+    /* Standard Tailwind slate palette (semantic approach uses CSS vars, not utility hijacking) */
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+
+    --color-slate-50: #f8fafc;
+    --color-slate-100: #f1f5f9;
+    --color-slate-200: #e2e8f0;
+    --color-slate-300: #cbd5e1;
+    --color-slate-400: #94a3b8;
+    --color-slate-500: #64748b;
+    --color-slate-600: #475569;
+    --color-slate-700: #334155;
+    --color-slate-800: #1e293b;
+    --color-slate-900: #0f172a;
+}
+
+:root {
+    /* LIGHT MODE — clean white background, dark text */
+    --background: #F8FAFC;
+    --foreground: #1E293B;
+    
+    --card: #FFFFFF;
+    --card-foreground: #1E293B;
+    
+    --popover: #FFFFFF;
+    --popover-foreground: #1E293B;
+    
+    --primary: #A65367;
+    --primary-foreground: #FFFFFF;
+    
+    --secondary: oklch(0.95 0.01 250);
+    --secondary-foreground: #1E293B;
+    
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
+    
+    --accent: #F1F5F9;
+    --accent-foreground: #1E293B;
+    
+    --destructive: oklch(0.58 0.18 25);
+    
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #A65367;
+    
+    --chart-1: oklch(0.524 0.108 5.5);
+    --chart-2: oklch(0.696 0.149 162.5);
+    --chart-3: oklch(0.685 0.148 237.3);
+    --chart-4: oklch(0.58 0.18 25);
+    --chart-5: oklch(0.55 0.08 270);
+    
+    --radius: 1rem;
+    
+    /* Sidebar — Darker Charcoal regardless of mode */
+    --sidebar: #161923;
+    --sidebar-foreground: #E2E8F0;
+    --sidebar-primary: #A65367;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #1E222F;
+    --sidebar-accent-foreground: #E2E8F0;
+    --sidebar-border: #2A2F3F;
+    --sidebar-ring: #A65367;
+}
+
+.dark {
+    /* DARK MODE — Deep navy blue-black with off-white text */
+    --background: #0F172A;
+    --foreground: #E2E8F0;
+    
+    --card: #0F172A;
+    --card-foreground: #E2E8F0;
+    
+    --popover: #0F172A;
+    --popover-foreground: #E2E8F0;
+    
+    --primary: #1F8A4C;
+    --primary-foreground: #FFFFFF;
+    
+    --secondary: #0F172A;
+    --secondary-foreground: #E2E8F0;
+    
+    --muted: #0F172A;
+    --muted-foreground: #94A3B8;
+    
+    --accent: #16203A;
+    --accent-foreground: #E2E8F0;
+    
+    --destructive: oklch(0.58 0.18 25);
+    
+    --border: rgba(255, 255, 255, 0.08);
+    --input: rgba(255, 255, 255, 0.06);
+    --ring: #1F8A4C;
+    
+    --chart-1: oklch(0.524 0.108 5.5);
+    --chart-2: oklch(0.696 0.149 162.5);
+    --chart-3: oklch(0.685 0.148 237.3);
+    --chart-4: oklch(0.58 0.18 25);
+    --chart-5: oklch(0.55 0.08 270);
+    
+    /* Sidebar — Deeper navy for depth */
+    --sidebar: #0E1626;
+    --sidebar-foreground: #E2E8F0;
+    --sidebar-primary: #1F8A4C;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #16203A;
+    --sidebar-accent-foreground: #E2E8F0;
+    --sidebar-border: rgba(255, 255, 255, 0.06);
+    --sidebar-ring: #1F8A4C;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    overscroll-behavior: none;
+  }
+  html {
+    @apply font-sans scroll-smooth;
+    overflow: hidden;
+  }
+}
+
+/* Premium Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .glass {
+  background: rgba(30, 41, 59, 0.85);
+}
+
+/* Premium Card Shadow */
+.card-shadow {
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.02),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    0 12px 24px rgba(0, 0, 0, 0.04);
+}
+
+.card-shadow-hover:hover {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.02),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 24px 48px rgba(0, 0, 0, 0.06);
+}
+
+/* Premium Gradient Background */
+.gradient-bg {
+  background: linear-gradient(135deg, 
+    oklch(0.99 0.002 250) 0%, 
+    oklch(0.97 0.01 195) 50%,
+    oklch(0.99 0.002 250) 100%
+  );
+}
+
+/* Premium Primary Gradient */
+.gradient-primary {
+  background: linear-gradient(135deg, 
+    oklch(0.524 0.108 5.5) 0%, 
+    oklch(0.495 0.156 17.2) 100%
+  );
+}
+
+/* Premium Text Gradient */
+.text-gradient {
+  background: linear-gradient(135deg, 
+    oklch(0.524 0.108 5.5) 0%, 
+    oklch(0.632 0.161 14.9) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Premium Border Gradient */
+.border-gradient {
+  border: 1px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, oklch(0.524 0.108 5.5), oklch(0.45 0.08 270)) border-box;
+}
+
+.dark .border-gradient {
+  background: linear-gradient(oklch(0.21 0.018 265), oklch(0.21 0.018 265)) padding-box,
+              linear-gradient(135deg, oklch(0.524 0.108 5.5), oklch(0.55 0.08 270)) border-box;
+}
+
+/* Premium Shine Effect */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.shine:hover::before {
+  left: 100%;
+}
+
+/* Premium Glow Effect */
+.glow {
+  box-shadow: 0 0 40px -10px oklch(0.524 0.108 5.5 / 0.3);
+}
+
+.glow-sm {
+  box-shadow: 0 0 20px -5px oklch(0.524 0.108 5.5 / 0.2);
+}
+
+/* Premium Ripple Effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Premium Button Styles */
+.btn-premium {
+  @apply relative overflow-hidden transition-all duration-300 ease-out;
+  transform: translateY(0);
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+}
+
+.btn-premium:active {
+  transform: translateY(0);
+}
+
+/* Premium Table Styles */
+.table-premium thead {
+  background: linear-gradient(to right, 
+    oklch(0.97 0.01 250),
+    oklch(0.95 0.01 195)
+  );
+}
+
+.table-premium tbody tr {
+  @apply transition-all duration-200;
+}
+
+.table-premium tbody tr:hover {
+  background: oklch(0.98 0.005 195 / 0.5);
+}
+
+/* Premium Badge Styles */
+.badge-premium {
+  @apply px-3 py-1 text-xs font-semibold rounded-full;
+  background: linear-gradient(135deg, 
+    oklch(0.524 0.108 5.5 / 0.1) 0%, 
+    oklch(0.632 0.161 14.9 / 0.1) 100%
+  );
+  border: 1px solid oklch(0.524 0.108 5.5 / 0.2);
+}
+
+/* Premium Input Focus */
+.input-premium:focus {
+  box-shadow: 0 0 0 3px oklch(0.524 0.108 5.5 / 0.15);
+}
+
+/* Premium Scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.524 0.108 5.5 / 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: oklch(0.524 0.108 5.5 / 0.3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.524 0.108 5.5 / 0.5);
+}
+
+/* ---- Global Light Mode Scrollbar ---- */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* ---- Global Dark Mode Scrollbar ---- */
+.dark *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark *::-webkit-scrollbar-track {
+  background: #0E1626;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 2px solid #0E1626;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Premium Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px oklch(0.524 0.108 5.5 / 0.2); }
+  50% { box-shadow: 0 0 40px oklch(0.524 0.108 5.5 / 0.4); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+/* Premium Skeleton Loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    oklch(0.94 0.01 250) 25%,
+    oklch(0.90 0.01 250) 50%,
+    oklch(0.94 0.01 250) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    oklch(0.20 0.02 250) 25%,
+    oklch(0.25 0.02 250) 50%,
+    oklch(0.20 0.02 250) 75%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Premium Status Indicators */
+.status-dot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.status-dot-success {
+  background: oklch(0.65 0.15 155);
+  box-shadow: 0 0 8px oklch(0.65 0.15 155 / 0.5);
+}
+
+.status-dot-warning {
+  background: oklch(0.75 0.12 85);
+  box-shadow: 0 0 8px oklch(0.75 0.12 85 / 0.5);
+}
+
+.status-dot-danger {
+  background: oklch(0.55 0.2 25);
+  box-shadow: 0 0 8px oklch(0.55 0.2 25 / 0.5);
+}
+
+/* Premium Divider */
+.divider-gradient {
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    oklch(0.524 0.108 5.5 / 0.3) 50%,
+    transparent 100%
+  );
+}
+
+/* Premium Dialog/Modal Backdrop */
+.dialog-backdrop {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+/* Premium Tooltip */
+.tooltip-premium {
+  @apply px-3 py-2 text-sm rounded-lg shadow-lg;
+  background: oklch(0.15 0.02 250);
+  color: oklch(0.97 0.01 250);
+}
+
+.dark .tooltip-premium {
+  background: oklch(0.95 0.01 250);
+  color: oklch(0.12 0.02 250);
+}
+
+/* Sidebar Premium Styles */
+.sidebar-item {
+  @apply relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200;
+}
+
+.sidebar-item:hover {
+  background: oklch(0.524 0.108 5.5 / 0.05);
+}
+
+.sidebar-item.active {
+  background: linear-gradient(135deg, 
+    oklch(0.524 0.108 5.5 / 0.1) 0%, 
+    oklch(0.524 0.108 5.5 / 0.05) 100%
+  );
+  border-left: 3px solid oklch(0.524 0.108 5.5);
+}
+
+/* Premium Checkbox */
+.checkbox-premium {
+  @apply w-5 h-5 rounded-md border-2 transition-all duration-200;
+  border-color: oklch(0.524 0.108 5.5);
+}
+
+.checkbox-premium:checked {
+  background: oklch(0.524 0.108 5.5);
+  border-color: oklch(0.524 0.108 5.5);
+}
+
+/* Premium Select */
+.select-premium {
+  @apply relative;
+}
+
+.select-premium select {
+  @apply appearance-none px-4 py-2 pr-10 rounded-lg border transition-all duration-200;
+}
+
+.select-premium::after {
+  content: '';
+  @apply absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 border-r-2 border-b-2 transform rotate-45;
+  border-color: oklch(0.5 0.03 250);
+}
+
+/* Premium Progress Bar */
+.progress-premium {
+  @apply h-2 rounded-full overflow-hidden;
+  background: oklch(0.92 0.01 250);
+}
+
+.progress-premium-bar {
+  @apply h-full rounded-full transition-all duration-500;
+  background: linear-gradient(90deg, 
+    oklch(0.524 0.108 5.5) 0%, 
+    oklch(0.632 0.161 14.9) 100%
+  );
+}
+
+/* Premium Avatar */
+.avatar-premium {
+  @apply rounded-full border-2 shadow-md;
+  border-color: oklch(0.524 0.108 5.5 / 0.2);
+}
+
+/* Sidebar Scroll */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.15) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.15);
+  border-radius: 4px;
+}
+
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+}
+
+/* ---- Typography Overrides - Pure White Headings ---- */
+.dark h1,
+.dark h2,
+.dark h3 {
+  color: #FFFFFF;
+}
+
+.dark .text-muted-foreground {
+  color: #cbd5e1;
+}
+
+/* ---- Icon Brightness Boost ---- */
+.dark .lucide {
+  opacity: 0.9;
+}
+
+.dark .text-primary .lucide,
+.dark .text-emerald-500 .lucide,
+.dark .text-amber-500 .lucide,
+.dark .text-blue-500 .lucide,
+.dark [class*="text-"] .lucide {
+  opacity: 1;
+}
+
+/* ---- Glow Effects ---- */
+.dark .card-glow-active {
+  box-shadow: 0 0 20px rgba(31, 138, 76, 0.15), 0 0 40px rgba(31, 138, 76, 0.1);
+  border-color: rgba(31, 138, 76, 0.3);
+}
+
+.dark .btn-glow-primary {
+  box-shadow: 0 0 16px rgba(31, 138, 76, 0.25);
+  transition: box-shadow 0.2s ease;
+}
+
+.dark .btn-glow-primary:hover {
+  box-shadow: 0 0 24px rgba(31, 138, 76, 0.4);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Toast / notification card  (Sonner)
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Base card — applied to every toast regardless of variant.
+   Sonner positions a fixed-width container; we override colours, shadow,
+   borders and the leading accent bar. The accent bar is implemented as a
+   `::before` pseudo-element pinned to the logical inline-start edge so
+   it flips to the right in RTL automatically. */
+.cn-toast[data-sonner-toast] {
+  /* Layout */
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;             /* 14px */
+  padding: 0.9rem 1rem 0.9rem 1.15rem;
+  min-height: 60px;
+  /* Visual */
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px !important;
+  background: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 24px rgba(15, 23, 42, 0.08),
+    0 2px 6px rgba(15, 23, 42, 0.04) !important;
+  overflow: hidden;          /* clip the accent bar */
+}
+
+.dark .cn-toast[data-sonner-toast] {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Leading accent bar (3px). `inset-inline-start: 0` is RTL-aware:
+   in LTR it pins to the left edge, in RTL to the right edge — so the
+   accent always sits on the *reading-start* side of the card. */
+.cn-toast[data-sonner-toast]::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: currentColor;  /* overridden per-variant below */
+  opacity: 0.85;
+}
+
+/* ── Icon badge ───────────────────────────────────────────────────────
+   Circular tinted background with the lucide glyph centred inside. We
+   override sonner's default `data-icon` slot directly because the prop
+   passed via `icons` lands inside `[data-icon]`, not in `.cn-toast-icon`. */
+.cn-toast[data-sonner-toast] [data-icon] {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+/* ── Content (title + description) ──────────────────────────────────── */
+.cn-toast-title {
+  font-size: 0.875rem;       /* 14px */
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--popover-foreground);
+}
+
+.cn-toast-description {
+  font-size: 0.8125rem;      /* 13px */
+  font-weight: 400;
+  line-height: 1.45;
+  margin-top: 0.15rem;
+  color: color-mix(in srgb, var(--popover-foreground) 70%, transparent);
+}
+
+/* ── Action / cancel buttons ────────────────────────────────────────── */
+.cn-toast-action,
+.cn-toast-cancel {
+  height: 28px !important;
+  padding: 0 0.7rem !important;
+  border-radius: 8px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
+
+.cn-toast-close {
+  /* Sonner positions the close button absolutely in the top-start corner.
+     Re-style as a small ghost button that doesn't fight with the badge. */
+  width: 22px !important;
+  height: 22px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--popover) !important;
+  color: color-mix(in srgb, var(--popover-foreground) 55%, transparent) !important;
+  border-radius: 6px !important;
+  inset-inline-end: 8px !important;
+  inset-inline-start: auto !important;
+  top: 8px !important;
+}
+
+.cn-toast-close:hover {
+  color: var(--popover-foreground) !important;
+  background: color-mix(in srgb, var(--popover-foreground) 6%, var(--popover)) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Per-variant accents
+   Sonner sets `data-type="success|info|warning|error"` on the root.
+   We tint:
+     1. the leading accent bar (`::before`)
+     2. the circular icon badge (`[data-icon]` background + glyph colour)
+   The card surface itself stays neutral so the toast still reads on any
+   page background — accent is reserved for the badge + bar only.
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Success — emerald */
+.cn-toast[data-sonner-toast][data-type="success"]::before {
+  background: #10B981;
+}
+.cn-toast[data-sonner-toast][data-type="success"] [data-icon] {
+  background: color-mix(in srgb, #10B981 14%, transparent);
+  color: #059669;
+}
+.dark .cn-toast[data-sonner-toast][data-type="success"] [data-icon] {
+  background: color-mix(in srgb, #10B981 20%, transparent);
+  color: #34D399;
+}
+
+/* Info — sky blue */
+.cn-toast[data-sonner-toast][data-type="info"]::before {
+  background: #0EA5E9;
+}
+.cn-toast[data-sonner-toast][data-type="info"] [data-icon] {
+  background: color-mix(in srgb, #0EA5E9 14%, transparent);
+  color: #0284C7;
+}
+.dark .cn-toast[data-sonner-toast][data-type="info"] [data-icon] {
+  background: color-mix(in srgb, #0EA5E9 20%, transparent);
+  color: #38BDF8;
+}
+
+/* Warning — amber */
+.cn-toast[data-sonner-toast][data-type="warning"]::before {
+  background: #F59E0B;
+}
+.cn-toast[data-sonner-toast][data-type="warning"] [data-icon] {
+  background: color-mix(in srgb, #F59E0B 16%, transparent);
+  color: #B45309;
+}
+.dark .cn-toast[data-sonner-toast][data-type="warning"] [data-icon] {
+  background: color-mix(in srgb, #F59E0B 22%, transparent);
+  color: #FBBF24;
+}
+
+/* Error — rose */
+.cn-toast[data-sonner-toast][data-type="error"]::before {
+  background: #F43F5E;
+}
+.cn-toast[data-sonner-toast][data-type="error"] [data-icon] {
+  background: color-mix(in srgb, #F43F5E 14%, transparent);
+  color: #E11D48;
+}
+.dark .cn-toast[data-sonner-toast][data-type="error"] [data-icon] {
+  background: color-mix(in srgb, #F43F5E 22%, transparent);
+  color: #FB7185;
+}
+
+/* Loading — neutral slate. Loading toasts shouldn't shout for attention. */
+.cn-toast[data-sonner-toast][data-type="loading"]::before {
+  background: #64748B;
+}
+.cn-toast[data-sonner-toast][data-type="loading"] [data-icon] {
+  background: color-mix(in srgb, #64748B 14%, transparent);
+  color: #475569;
+}
+.dark .cn-toast[data-sonner-toast][data-type="loading"] [data-icon] {
+  background: color-mix(in srgb, #64748B 22%, transparent);
+  color: #94A3B8;
+}
+
+/* Default / unstyled toasts (`toast("...")` without a variant) — give
+   them a neutral slate accent so they still get the design language. */
+.cn-toast[data-sonner-toast][data-type="default"]::before {
+  background: #94A3B8;
+}
+.cn-toast[data-sonner-toast][data-type="default"] [data-icon] {
+  background: color-mix(in srgb, #94A3B8 14%, transparent);
+  color: #475569;
+}
+.dark .cn-toast[data-sonner-toast][data-type="default"] [data-icon] {
+  background: color-mix(in srgb, #94A3B8 22%, transparent);
+  color: #CBD5E1;
+}
+
+/* Mobile — let the card breathe a little less and span more of the
+   viewport so the title doesn't get truncated on narrow phones. */
+@media (max-width: 480px) {
+  .cn-toast[data-sonner-toast] {
+    max-width: calc(100vw - 1.5rem);
+    padding: 0.75rem 0.85rem 0.75rem 1rem;
+    min-height: 52px;
+  }
+  .cn-toast[data-sonner-toast] [data-icon] {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+

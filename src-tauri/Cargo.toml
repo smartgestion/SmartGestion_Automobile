@@ -1,0 +1,83 @@
+[package]
+name = "app"
+version = "0.1.0"
+description = "ParaGestion - Local-first ERP desktop app"
+authors = ["ParaGestion"]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.2", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+tauri = { version = "2.11.2", features = [] }
+tauri-plugin-log = "2"
+
+# SQLite (bundled = embeds SQLite source, no system dependency required)
+rusqlite = { version = "0.32", features = ["bundled", "chrono"] }
+
+# Thread-safe interior mutability for the shared connection
+parking_lot = "0.12"
+
+# Better error handling across IPC boundaries
+thiserror = "1"
+
+# UUIDs (used by some Supabase-origin columns like notifications.id)
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Date/time helpers
+chrono = { version = "0.4", features = ["serde"] }
+
+# Password hashing for the local users table.
+# `bcrypt` is self-contained: the encoded string carries algo + cost + salt,
+# so we only need a single TEXT column. Cost 12 (~250 ms / hash) is the
+# OWASP 2024 default for interactive logins.
+bcrypt = "0.15"
+
+# Hardware fingerprint for device-binding (Task 7A).
+# `machine-uid` reads the OS-assigned identifier on every supported
+# platform — without any external service or network call:
+#   * Windows: HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid
+#   * macOS:   IOPlatformUUID (via IOKit)
+#   * Linux:   /etc/machine-id (with /var/lib/dbus/machine-id fallback)
+machine-uid = "0.5"
+
+# Cryptographic hashing — used to SHA-256 the raw machine GUID before it
+# crosses the IPC boundary so the OS-level identifier itself never reaches
+# the frontend / cloud.
+sha2 = "0.10"
+
+# ---------------------------------------------------------------------------
+# Release profile — tuned for the production desktop installer.
+# ---------------------------------------------------------------------------
+#
+# These settings yield the smallest possible self-contained binary at the
+# cost of ~2× the dev build time. They are only applied when running
+# `cargo build --release` (which is what `tauri build` invokes), so the
+# `tauri dev` cycle stays fast.
+#
+#   panic   = "abort"   → no unwinder code in the final binary
+#   lto     = true      → cross-crate Link-Time Optimization
+#   codegen-units = 1   → maximum optimisation surface per unit
+#   strip   = "symbols" → remove debug symbols (≈30 % size reduction)
+#   opt-level = "s"     → optimize for size (still ~95 % of -O3 perf for our
+#                         IPC-bound workload; bcrypt itself is already O(n))
+# ---------------------------------------------------------------------------
+
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
+strip = "symbols"
+opt-level = "s"
