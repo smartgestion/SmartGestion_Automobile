@@ -3,7 +3,8 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { NotificationBell } from './NotificationDropdown'
 import { LanguageSelector } from './LanguageSelector'
-import { Menu, ChevronDown, Settings, LogOut, Maximize2, Minimize2 } from 'lucide-react'
+import { TvaCalculator } from './TvaCalculator'
+import { Menu, ChevronDown, Settings, LogOut, Maximize2, Minimize2, Calculator } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/contexts/AuthContext'
@@ -28,6 +29,7 @@ const routeMeta: Record<string, { titleKey: string; subtitleKey: string }> = {
   '/produits':        { titleKey: 'navigation.products',       subtitleKey: 'header.subtitles.products'       },
   '/parametres':      { titleKey: 'navigation.settings',       subtitleKey: 'header.subtitles.settings'       },
   '/transactions':    { titleKey: 'navigation.transactions',   subtitleKey: 'header.subtitles.transactions'   },
+  '/portefeuille':    { titleKey: 'navigation.portefeuille',   subtitleKey: 'header.subtitles.portefeuille'   },
 };
 
 export function DashboardLayout() {
@@ -38,6 +40,7 @@ export function DashboardLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [calculatorOpen, setCalculatorOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   // Keep the fullscreen toggle icon in sync with the actual browser state
@@ -165,6 +168,20 @@ export function DashboardLayout() {
                 {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
               </Button>
 
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  'h-9 w-9 text-muted-foreground hover:text-foreground',
+                  calculatorOpen && 'bg-emerald-500/10 text-emerald-500 hover:text-emerald-500',
+                )}
+                onClick={() => setCalculatorOpen((o) => !o)}
+                title={t('calculator.title')}
+                aria-label={t('calculator.title')}
+              >
+                <Calculator className="h-4 w-4" />
+              </Button>
+
               <NotificationBell />
 
               <div className="hidden lg:block w-px h-8 bg-border" />
@@ -240,6 +257,9 @@ export function DashboardLayout() {
           </div>
         </main>
       </div>
+
+      {/* Floating Quick TVA calculator — stays open while working. */}
+      <TvaCalculator open={calculatorOpen} onClose={() => setCalculatorOpen(false)} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input'
+import { HtFromTtcButton } from '@/components/ui/HtFromTtcButton'
 import { Textarea } from '@/components/ui/textarea'
 import { formatCurrency } from '@/lib/utils'
 import {
@@ -265,9 +266,16 @@ export function DepenseForm({ initialData, onSuccess }: DepenseFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-slate-700 font-semibold dark:text-slate-300">{t('shared.form.amount_ht')}</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" className="bg-white border-slate-300 font-mono dark:bg-slate-950/50 dark:border-white/10 dark:text-white" {...field} />
-                    </FormControl>
+                    <div className="flex items-center gap-1">
+                      <FormControl>
+                        <Input type="number" step="0.01" className="bg-white border-slate-300 font-mono dark:bg-slate-950/50 dark:border-white/10 dark:text-white" {...field} />
+                      </FormControl>
+                      <HtFromTtcButton
+                        defaultTva={Number(form.watch('tva') ?? 20)}
+                        onResult={(ht) => form.setValue('montantHt', ht, { shouldValidate: true, shouldDirty: true })}
+                        className="h-10"
+                      />
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

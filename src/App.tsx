@@ -25,6 +25,7 @@ import { Parametres } from './pages/parametres/Parametres'
 import { DatabaseManager } from './pages/DatabaseManager'
 import { SqlEditor } from './pages/SqlEditor'
 import { TransactionsList } from './pages/transactions/TransactionsList'
+import { Portefeuille } from './pages/portefeuille/Portefeuille'
 import { Toaster } from '@/components/ui/sonner'
 import i18n from './lib/i18n'
 
@@ -94,6 +95,7 @@ export default function App() {
               <Route path="database" element={<DatabaseManager />} />
               <Route path="sql-editor" element={<SqlEditor />} />
               <Route path="transactions" element={<TransactionsList />} />
+              <Route path="portefeuille" element={<Portefeuille />} />
               <Route path="*" element={<div className="p-8 text-center text-muted-foreground">Page en cours de développement</div>} />
             </Route>
           </Route>

@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ProductSearchSelect } from '@/components/ui/ProductSearchSelect'
+import { HtFromTtcButton } from '@/components/ui/HtFromTtcButton'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
@@ -447,21 +449,12 @@ export function BonCommandeForm({ initialData, onSuccess }: BCFormProps) {
                 return (
                   <tr key={field.id} className="hover:bg-slate-50/50 transition-colors dark:hover:bg-white/[0.03]">
                     <td className="p-2">
-                      <Select
-                        value={form.watch(`lignes.${index}.produitId`) || ""}
-                        onValueChange={(val) => handleProduitSelect(index, val)}
-                      >
-                        <SelectTrigger className="h-9 bg-white border-slate-200 dark:bg-slate-950/50 dark:border-white/10 [&_.lucide-chevron-down]:dark:text-slate-500">
-                          <SelectValue placeholder={t('shared.form.choose_product')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {produits.map((p) => (
-                            <SelectItem key={p.id} value={p.id.toString()}>
-                              {p.designation || p.nom || '-'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <ProductSearchSelect
+                        produits={produits}
+                        value={form.watch(`lignes.${index}.produitId`) || ''}
+                        onSelect={(val) => handleProduitSelect(index, val)}
+                        priceMode="purchase"
+                      />
                     </td>
                     <td className="p-2">
                       <Input
@@ -478,12 +471,18 @@ export function BonCommandeForm({ initialData, onSuccess }: BCFormProps) {
                       />
                     </td>
                     <td className="p-2">
-                      <Input
-                        type="number"
-                        step="0.01"
-                        className="h-9 text-right bg-white border-slate-200 dark:bg-slate-950/50 dark:border-white/10 dark:text-white"
-                        {...form.register(`lignes.${index}.prixUnitaireHt`, { valueAsNumber: true })}
-                      />
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          className="h-9 text-right bg-white border-slate-200 dark:bg-slate-950/50 dark:border-white/10 dark:text-white"
+                          {...form.register(`lignes.${index}.prixUnitaireHt`, { valueAsNumber: true })}
+                        />
+                        <HtFromTtcButton
+                          defaultTva={Number(form.watch(`lignes.${index}.tva`) ?? 20)}
+                          onResult={(ht) => form.setValue(`lignes.${index}.prixUnitaireHt`, ht, { shouldValidate: true, shouldDirty: true })}
+                        />
+                      </div>
                     </td>
                     <td className="p-2">
                       <Input

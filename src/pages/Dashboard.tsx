@@ -23,6 +23,7 @@ import {
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { KPICard } from '@/components/ui/kpi-card'
+import { ProductSalesAnalytics } from '@/pages/dashboard/ProductSalesAnalytics'
 import { useTranslation } from 'react-i18next'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1219,6 +1220,9 @@ export function Dashboard() {
           })()}
         </DialogContent>
       </Dialog>
+
+      {/* ── Product Sales Analytics (combines Factures + Ventes Passagers) ──── */}
+      <ProductSalesAnalytics />
     </div>
   )
 }

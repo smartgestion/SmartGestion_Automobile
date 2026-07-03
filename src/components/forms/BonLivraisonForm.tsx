@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ProductSearchSelect } from '@/components/ui/ProductSearchSelect'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
@@ -400,21 +401,12 @@ export function BonLivraisonForm({ initialData, onSuccess }: BLFormProps) {
                 return (
                   <tr key={field.id} className="hover:bg-slate-50/50 transition-colors dark:hover:bg-white/[0.03]">
                     <td className="p-2">
-                      <Select
-                        value={form.watch(`lignes.${index}.produitId`) || ""}
-                        onValueChange={(val) => handleProduitSelect(index, val)}
-                      >
-                        <SelectTrigger className="h-9 bg-white border-slate-200 dark:bg-slate-950/50 dark:border-white/10 [&_.lucide-chevron-down]:dark:text-slate-500">
-                          <SelectValue placeholder={t('shared.form.choose_product')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {produits.map((p) => (
-                            <SelectItem key={p.id} value={p.id.toString()}>
-                              {p.designation || p.nom || '-'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <ProductSearchSelect
+                        produits={produits}
+                        value={form.watch(`lignes.${index}.produitId`) || ''}
+                        onSelect={(val) => handleProduitSelect(index, val)}
+                        priceMode="purchase"
+                      />
                     </td>
                     <td className="p-2">
                       <Input

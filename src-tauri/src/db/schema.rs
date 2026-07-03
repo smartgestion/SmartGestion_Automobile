@@ -605,9 +605,49 @@ pub const MIGRATIONS: &[&str] = &[
     "#,
 
     // -----------------------------------------------------------------
+    // Portefeuille — document management (folders, uploaded files, papers)
+    // -----------------------------------------------------------------
+    r#"
+    CREATE TABLE IF NOT EXISTS portefeuille_folders (
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        name         TEXT    NOT NULL,
+        parent_id    INTEGER REFERENCES portefeuille_folders(id) ON DELETE CASCADE,
+        is_favorite  INTEGER DEFAULT 0,
+        is_deleted   INTEGER DEFAULT 0,
+        created_at   TEXT    DEFAULT CURRENT_TIMESTAMP,
+        updated_at   TEXT    DEFAULT CURRENT_TIMESTAMP,
+        user_id      TEXT
+    );
+    "#,
+    r#"
+    CREATE TABLE IF NOT EXISTS portefeuille_items (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        folder_id     INTEGER REFERENCES portefeuille_folders(id) ON DELETE CASCADE,
+        kind          TEXT    NOT NULL DEFAULT 'file',   -- 'file' | 'paper'
+        name          TEXT    NOT NULL,
+        mime_type     TEXT,                              -- for uploaded files
+        file_ext      TEXT,                              -- e.g. pdf, png, docx
+        size_bytes    INTEGER DEFAULT 0,
+        content       TEXT,                              -- base64 data-URL (file) OR HTML (paper)
+        tags          TEXT,                              -- comma-separated tags
+        is_favorite   INTEGER DEFAULT 0,
+        is_deleted    INTEGER DEFAULT 0,
+        last_opened_at TEXT,
+        created_at    TEXT    DEFAULT CURRENT_TIMESTAMP,
+        updated_at    TEXT    DEFAULT CURRENT_TIMESTAMP,
+        user_id       TEXT
+    );
+    "#,
+
+    // -----------------------------------------------------------------
     // Helpful indexes on hot foreign-key paths
     // -----------------------------------------------------------------
     "CREATE INDEX IF NOT EXISTS idx_users_email                 ON users(email);",
+    "CREATE INDEX IF NOT EXISTS idx_pf_folders_parent           ON portefeuille_folders(parent_id);",
+    "CREATE INDEX IF NOT EXISTS idx_pf_folders_user             ON portefeuille_folders(user_id);",
+    "CREATE INDEX IF NOT EXISTS idx_pf_items_folder             ON portefeuille_items(folder_id);",
+    "CREATE INDEX IF NOT EXISTS idx_pf_items_user               ON portefeuille_items(user_id);",
+    "CREATE INDEX IF NOT EXISTS idx_pf_items_kind               ON portefeuille_items(kind);",
     "CREATE INDEX IF NOT EXISTS idx_factures_client_id          ON factures(client_id);",
     "CREATE INDEX IF NOT EXISTS idx_factures_devis_id           ON factures(devis_id);",
     "CREATE INDEX IF NOT EXISTS idx_facture_lignes_facture_id   ON facture_lignes(facture_id);",
@@ -637,4 +677,6 @@ pub const MIGRATIONS: &[&str] = &[
 ///
 ///   v1 — initial Supabase-parity schema (Task 2).
 ///   v2 — adds the `users` table for offline authentication (Task 4A).
-pub const SCHEMA_VERSION: i64 = 2;
+///   v3 — adds the Portefeuille document management tables
+///        (`portefeuille_folders`, `portefeuille_items`).
+pub const SCHEMA_VERSION: i64 = 3;

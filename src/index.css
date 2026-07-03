@@ -880,4 +880,10 @@
   }
 }
 
+/* Portefeuille paper editor: show a placeholder when empty. */
+.pf-paper-editor:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
 

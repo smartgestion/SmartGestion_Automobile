@@ -135,12 +135,40 @@ fn add_column_if_missing(
     Ok(())
 }
 
+/// Returns true if `table` exists and has a column named `column`.
+fn table_has_column(conn: &Connection, table: &str, column: &str) -> DbResult<bool> {
+    let mut stmt = conn.prepare(&format!("PRAGMA table_info({});", table))?;
+    let found = stmt
+        .query_map([], |row| row.get::<_, String>(1))?
+        .filter_map(|r| r.ok())
+        .any(|name| name == column);
+    Ok(found)
+}
+
 /// Apply migrations idempotently inside a single transaction.
 fn apply_migrations(conn: &Connection) -> DbResult<()> {
     let tx_sql = "BEGIN IMMEDIATE;";
     conn.execute_batch(tx_sql)?;
 
     let result: DbResult<()> = (|| {
+        // One-time cleanup: an earlier experimental Portefeuille schema created
+        // `portefeuille_folders` with a `nom NOT NULL` column (plus separate
+        // `portefeuille_files` / `portefeuille_papers` tables). That layout is
+        // incompatible with the current definition and `CREATE TABLE IF NOT
+        // EXISTS` cannot fix an existing table. If we detect that legacy shape,
+        // drop the Portefeuille tables so the migrations below recreate them
+        // correctly. This runs at most once (the rebuilt tables no longer have
+        // a `nom` column) and is safe because Portefeuille shipped empty.
+        if table_has_column(conn, "portefeuille_folders", "nom")? {
+            conn.execute_batch(
+                "DROP TABLE IF EXISTS portefeuille_items;
+                 DROP TABLE IF EXISTS portefeuille_files;
+                 DROP TABLE IF EXISTS portefeuille_papers;
+                 DROP TABLE IF EXISTS portefeuille_folders;",
+            )?;
+            log::info!("Rebuilt legacy Portefeuille tables to the current schema.");
+        }
+
         for stmt in schema::MIGRATIONS {
             conn.execute_batch(stmt)?;
         }

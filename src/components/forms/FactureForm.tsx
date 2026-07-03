@@ -15,6 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ProductSearchSelect } from '@/components/ui/ProductSearchSelect'
+import { HtFromTtcButton } from '@/components/ui/HtFromTtcButton'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
@@ -445,33 +447,16 @@ export function FactureForm({ initialData, onSuccess }: FactureFormProps) {
                 const ligne = watchLignes[index];
                 const totalHt = (ligne?.quantite || 0) * (ligne?.prixUnitaireHt || 0);
                 const selectedProductId = form.watch(`lignes.${index}.produitId`);
-                const selectedProduct = selectedProductId ? produits.find(p => p.id.toString() === selectedProductId) : null;
-                const displayText = selectedProduct ? (selectedProduct.nom || selectedProduct.reference || '-') : (ligne?.designation || '');
 
                 return (
                   <tr key={field.id}>
                     <td className="p-2">
-                      <Select
-                        value={selectedProductId || ""}
-                        onValueChange={(val) => handleProduitSelect(index, val)}
-                      >
-                        <SelectTrigger className="h-9 dark:bg-slate-950/50 dark:border-white/10 bg-white border-slate-200">
-                          {selectedProductId ? (
-                            <span className={!selectedProduct ? 'text-orange-500' : ''}>
-                              {displayText}
-                            </span>
-                          ) : (
-                            <SelectValue placeholder={t('shared.form.choose_product')} />
-                          )}
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[400px] overflow-y-auto">
-                          {produits.map((p) => (
-                            <SelectItem key={p.id} value={p.id.toString()}>
-                              {p.nom || p.reference || '-'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <ProductSearchSelect
+                        produits={produits}
+                        value={selectedProductId || ''}
+                        onSelect={(val) => handleProduitSelect(index, val)}
+                        priceMode="sale"
+                      />
                     </td>
                     <td className="p-2">
                       <Input
@@ -488,12 +473,18 @@ export function FactureForm({ initialData, onSuccess }: FactureFormProps) {
                       />
                     </td>
                     <td className="p-2">
-                      <Input
-                        type="number"
-                        step="0.01"
-                        className="h-9 text-right dark:bg-slate-950/50 dark:border-white/10 dark:focus:border-[#267E54] bg-white border-slate-200"
-                        {...form.register(`lignes.${index}.prixUnitaireHt`, { valueAsNumber: true })}
-                      />
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          className="h-9 text-right dark:bg-slate-950/50 dark:border-white/10 dark:focus:border-[#267E54] bg-white border-slate-200"
+                          {...form.register(`lignes.${index}.prixUnitaireHt`, { valueAsNumber: true })}
+                        />
+                        <HtFromTtcButton
+                          defaultTva={Number(form.watch(`lignes.${index}.tva`) ?? 20)}
+                          onResult={(ht) => form.setValue(`lignes.${index}.prixUnitaireHt`, ht, { shouldValidate: true, shouldDirty: true })}
+                        />
+                      </div>
                     </td>
                     <td className="p-2">
                       <Input
