@@ -49,6 +49,7 @@
       "print": "Print",
       "sheet_name": "Sales",
       "file_name": "product_sales",
+      "toast_excel_downloaded": "Excel downloaded",
       "source_facture": "Invoice",
       "source_vp": "Counter Sale",
       "summary": {
@@ -338,6 +339,7 @@
     "unfavorite": "Remove from favorites",
     "print": "Print",
     "export_pdf": "Export as PDF",
+    "export_word": "Download as Word",
     "save": "Save",
     "saving": "Saving...",
     "saved": "Saved",
@@ -364,6 +366,11 @@
     "drop_here": "Drop files here to upload",
     "untitled_paper": "Untitled paper",
     "no_preview": "Preview not available for this file type",
+    "zoom_in": "Zoom in",
+    "zoom_out": "Zoom out",
+    "zoom_reset": "Reset zoom",
+    "rotate": "Rotate",
+    "close": "Close",
     "editor_placeholder": "Start writing...",
     "trash_empty": "Trash is empty",
     "favorites_empty": "No favorites",
@@ -378,7 +385,11 @@
       "restored": "Restored",
       "purged": "Permanently deleted",
       "error": "Something went wrong",
-      "file_too_large": "File too large (max 25 MB)"
+      "file_too_large": "File too large (max 25 MB)",
+      "downloading": "Downloading \"{{name}}\"...",
+      "downloaded": "\"{{name}}\" downloaded",
+      "download_error": "Download failed",
+      "word_downloaded": "Word document downloaded"
     }
   },
   "calculator": {

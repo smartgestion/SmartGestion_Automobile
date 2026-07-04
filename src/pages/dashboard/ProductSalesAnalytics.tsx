@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback, type ElementType } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import * as XLSX from 'xlsx'
 import {
   CalendarDays, Package, ShoppingCart, Receipt, FileSpreadsheet, FileText,
@@ -376,6 +377,7 @@ export function ProductSalesAnalytics() {
     XLSX.utils.book_append_sheet(wb, ws, tp('sheet_name'))
     const stamp = new Date().toISOString().slice(0, 10)
     XLSX.writeFile(wb, `${tp('file_name')}_${stamp}.xlsx`)
+    toast.success(tp('toast_excel_downloaded'))
   }
 
   const buildPrintHtml = () => {

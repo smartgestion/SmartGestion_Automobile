@@ -49,6 +49,7 @@
       "print": "طباعة",
       "sheet_name": "المبيعات",
       "file_name": "مبيعات_المنتجات",
+      "toast_excel_downloaded": "تم تنزيل إكسل",
       "source_facture": "فاتورة",
       "source_vp": "بيع مرور",
       "summary": {
@@ -338,6 +339,7 @@
     "unfavorite": "إزالة من المفضلة",
     "print": "طباعة",
     "export_pdf": "تصدير PDF",
+    "export_word": "تنزيل بصيغة Word",
     "save": "حفظ",
     "saving": "جارٍ الحفظ...",
     "saved": "تم الحفظ",
@@ -364,6 +366,11 @@
     "drop_here": "أفلت الملفات هنا للرفع",
     "untitled_paper": "مستند بدون عنوان",
     "no_preview": "المعاينة غير متاحة لهذا النوع من الملفات",
+    "zoom_in": "تكبير",
+    "zoom_out": "تصغير",
+    "zoom_reset": "إعادة تعيين التكبير",
+    "rotate": "تدوير",
+    "close": "إغلاق",
     "editor_placeholder": "ابدأ الكتابة...",
     "trash_empty": "سلة المهملات فارغة",
     "favorites_empty": "لا توجد مفضلة",
@@ -378,7 +385,11 @@
       "restored": "تمت الاستعادة",
       "purged": "تم الحذف نهائياً",
       "error": "حدث خطأ ما",
-      "file_too_large": "الملف كبير جداً (الحد 25 ميغابايت)"
+      "file_too_large": "الملف كبير جداً (الحد 25 ميغابايت)",
+      "downloading": "جارٍ تنزيل «{{name}}»...",
+      "downloaded": "تم تنزيل «{{name}}»",
+      "download_error": "فشل التنزيل",
+      "word_downloaded": "تم تنزيل مستند Word"
     }
   },
   "calculator": {

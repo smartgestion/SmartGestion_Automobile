@@ -130,19 +130,24 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
           isRTL ? 'origin-top-left' : 'origin-top-right',
         )}
       >
-        <div className="bg-popover rounded-[12px] shadow-xl border border-border overflow-hidden">
+        <div className="bg-popover/95 backdrop-blur-xl rounded-[16px] shadow-2xl shadow-black/20 border border-border/60 ring-1 ring-black/5 overflow-hidden">
           {/* ── Header ──────────────────────────────────────────────────── */}
-          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+          <div className="px-5 py-4 border-b border-border/60 flex items-center justify-between bg-gradient-to-b from-muted/40 to-transparent">
+            <div className="flex items-center gap-3">
               <div className="relative">
-                <Bell className={cn(
-                  'h-5 w-5 transition-colors',
-                  enabled ? 'text-popover-foreground' : 'text-muted-foreground',
-                )} />
+                <div className={cn(
+                  'h-9 w-9 rounded-[12px] flex items-center justify-center transition-colors',
+                  enabled ? 'bg-emerald-500/10 ring-1 ring-emerald-500/20' : 'bg-muted',
+                )}>
+                  <Bell className={cn(
+                    'h-[18px] w-[18px] transition-colors',
+                    enabled ? 'text-emerald-400' : 'text-muted-foreground',
+                  )} />
+                </div>
                 {enabled && unreadCount > 0 && (
                   <span className={cn(
                     // RTL Note: -end-1.5 anchors the badge to the logical end of the bell.
-                    'absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full ring-2 ring-popover',
+                    'absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full ring-2 ring-popover shadow-sm',
                     'flex items-center justify-center text-[10px] leading-none font-bold tabular-nums text-white',
                     hasHighPriority ? 'bg-red-500' : 'bg-emerald-500',
                   )} dir="ltr">
@@ -151,10 +156,10 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
                 )}
               </div>
               <div>
-                <h3 className="text-sm font-bold text-popover-foreground">
+                <h3 className="text-sm font-bold text-popover-foreground tracking-tight">
                   {t('notifications.title')}
                 </h3>
-                <p className="text-[10px] text-muted-foreground font-medium">
+                <p className="text-[11px] text-muted-foreground font-medium mt-0.5">
                   {subtitle}
                 </p>
               </div>
@@ -162,7 +167,7 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
             {enabled && unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 px-2.5 py-1.5 rounded-[6px] transition-colors flex items-center gap-1.5"
+                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-500/5 hover:bg-emerald-500/15 ring-1 ring-emerald-500/20 hover:ring-emerald-500/30 px-3 py-1.5 rounded-[8px] transition-all duration-200 flex items-center gap-1.5 active:scale-95"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 {t('notifications.mark_all_read')}
@@ -174,7 +179,7 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
           <div className="max-h-[420px] overflow-y-auto custom-scrollbar">
             {!enabled ? (
               <div className="p-8 text-center">
-                <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                <div className="mx-auto mb-3 h-14 w-14 rounded-[16px] bg-muted ring-1 ring-border flex items-center justify-center">
                   <BellOff className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <p className="text-sm font-medium text-popover-foreground">
@@ -195,8 +200,8 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-8 text-center">
-                <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                  <Bell className="h-6 w-6 text-muted-foreground" />
+                <div className="mx-auto mb-3 h-14 w-14 rounded-[16px] bg-emerald-500/10 ring-1 ring-emerald-500/20 flex items-center justify-center">
+                  <CheckCheck className="h-6 w-6 text-emerald-400" />
                 </div>
                 <p className="text-sm font-medium text-popover-foreground">
                   {t('notifications.empty_title')}
@@ -215,15 +220,24 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
                       key={n.id}
                       className={cn(
                         'px-5 py-3.5 transition-colors relative group',
-                        !n.is_read ? 'bg-muted' : 'hover:bg-muted/50',
+                        !n.is_read
+                          ? 'bg-muted/70 hover:bg-muted'
+                          : 'hover:bg-muted/50',
                       )}
                     >
+                      {/* Unread accent bar (logical start) */}
+                      {!n.is_read && (
+                        <span className={cn(
+                          'absolute inset-y-0 start-0 w-[3px] rounded-full',
+                          config.dot,
+                        )} />
+                      )}
                       <div className="flex items-start gap-3">
                         <div className={cn(
-                          'mt-0.5 h-8 w-8 rounded-[10px] border-border border flex items-center justify-center shrink-0',
+                          'mt-0.5 h-9 w-9 rounded-[11px] border-border border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105',
                           config.bg,
                         )}>
-                          <Icon className="h-4 w-4" />
+                          <Icon className="h-[18px] w-[18px]" />
                         </div>
 
                         <div className="flex-1 min-w-0">
@@ -236,15 +250,15 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
                             </p>
                             {!n.is_read && (
                               <span className={cn(
-                                'mt-1 h-2 w-2 rounded-full shrink-0',
+                                'mt-1 h-2 w-2 rounded-full shrink-0 ring-2 ring-popover animate-pulse',
                                 config.dot,
                               )} />
                             )}
                           </div>
                           {n.message && (
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{n.message}</p>
                           )}
-                          <div className="flex items-center gap-2 mt-1.5">
+                          <div className="flex items-center gap-1.5 mt-2">
                             <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
                             <TimeAgo date={n.created_at} />
                             {!n.is_read && (
@@ -254,7 +268,7 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
                                   markAsRead(n.id)
                                 }}
                                 // RTL Note: ms-auto = margin-inline-start auto pushes to logical end
-                                className="ms-auto text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 opacity-0 group-hover:opacity-100 transition-opacity relative z-20"
+                                className="ms-auto text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 relative z-20"
                               >
                                 {t('notifications.mark_one_read')}
                               </button>
@@ -280,8 +294,8 @@ export function NotificationDropdown({ open, onClose, enabled }: NotificationDro
 
           {/* ── Footer ──────────────────────────────────────────────────── */}
           {enabled && notifications.length > 0 && (
-            <div className="px-5 py-3 border-t border-border bg-muted/50">
-              <p className="text-[10px] text-muted-foreground font-medium text-center">
+            <div className="px-5 py-3 border-t border-border/60 bg-gradient-to-t from-muted/50 to-transparent">
+              <p className="text-[10px] text-muted-foreground font-semibold text-center tracking-wide uppercase">
                 {footerLabel}
               </p>
             </div>
@@ -355,7 +369,7 @@ export function NotificationBell() {
             )}
             <span className={cn(
               'absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 rounded-full',
-              'ring-2 ring-white shadow-sm shadow-black/20',
+              'ring-2 ring-background shadow-sm shadow-black/20',
               'flex items-center justify-center text-[10px] leading-none font-bold tabular-nums text-white',
               hasHighPriority ? 'bg-red-500' : 'bg-emerald-500',
             )} dir="ltr">

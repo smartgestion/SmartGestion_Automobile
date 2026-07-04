@@ -49,6 +49,7 @@
       "print": "Imprimer",
       "sheet_name": "Ventes",
       "file_name": "ventes_produits",
+      "toast_excel_downloaded": "Excel téléchargé",
       "source_facture": "Facture",
       "source_vp": "Vente Passager",
       "summary": {
@@ -338,6 +339,7 @@
     "unfavorite": "Retirer des favoris",
     "print": "Imprimer",
     "export_pdf": "Exporter en PDF",
+    "export_word": "Télécharger en Word",
     "save": "Enregistrer",
     "saving": "Enregistrement...",
     "saved": "Enregistré",
@@ -364,6 +366,11 @@
     "drop_here": "Déposez les fichiers ici pour les téléverser",
     "untitled_paper": "Document sans titre",
     "no_preview": "Aperçu non disponible pour ce type de fichier",
+    "zoom_in": "Zoom avant",
+    "zoom_out": "Zoom arrière",
+    "zoom_reset": "Réinitialiser le zoom",
+    "rotate": "Pivoter",
+    "close": "Fermer",
     "editor_placeholder": "Commencez à écrire...",
     "trash_empty": "La corbeille est vide",
     "favorites_empty": "Aucun favori",
@@ -378,7 +385,11 @@
       "restored": "Restauré",
       "purged": "Supprimé définitivement",
       "error": "Une erreur est survenue",
-      "file_too_large": "Fichier trop volumineux (max 25 Mo)"
+      "file_too_large": "Fichier trop volumineux (max 25 Mo)",
+      "downloading": "Téléchargement de « {{name}} »...",
+      "downloaded": "« {{name}} » téléchargé",
+      "download_error": "Échec du téléchargement",
+      "word_downloaded": "Document Word téléchargé"
     }
   },
   "calculator": {

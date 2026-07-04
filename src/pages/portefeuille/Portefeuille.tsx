@@ -1,4 +1,6 @@
-import { useEffect, useState, useCallback, useMemo, useRef, type ElementType, type DragEvent as ReactDragEvent, type FC } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef, useLayoutEffect, type ElementType, type ReactNode, type DragEvent as ReactDragEvent, type WheelEvent as ReactWheelEvent, type PointerEvent as ReactPointerEvent, type FC } from 'react'
+import { createPortal } from 'react-dom'
+import * as XLSX from 'xlsx'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
@@ -6,6 +8,7 @@ import {
   MoreVertical, Pencil, Trash2, Download, Move, Star, Eye, X,
   FileText, FileImage, FileSpreadsheet, File as FileIcon, Loader2,
   Grid3x3, Clock, RotateCcw, Star as StarIcon, Layers,
+  ZoomIn, ZoomOut, RotateCw,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -338,18 +341,28 @@ export function Portefeuille() {
   }
 
   const downloadItem = async (it: Item) => {
-    const content = it.content != null ? it.content : await fetchContent(it.id)
-    const a = document.createElement('a')
-    if (it.kind === 'paper') {
-      const blob = new Blob([content], { type: 'text/html' })
-      a.href = URL.createObjectURL(blob)
-      a.download = it.name.endsWith('.html') ? it.name : `${it.name}.html`
-    } else {
-      a.href = content // data URL
-      a.download = it.name
+    const toastId = toast.loading(tp('toast.downloading', { name: it.name }))
+    try {
+      const content = it.content != null ? it.content : await fetchContent(it.id)
+      if (!content) throw new Error('empty content')
+      const a = document.createElement('a')
+      let objectUrl: string | null = null
+      if (it.kind === 'paper') {
+        const blob = new Blob([content], { type: 'text/html' })
+        objectUrl = URL.createObjectURL(blob)
+        a.href = objectUrl
+        a.download = it.name.endsWith('.html') ? it.name : `${it.name}.html`
+      } else {
+        a.href = content // data URL
+        a.download = it.name
+      }
+      document.body.appendChild(a); a.click(); a.remove()
+      if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl!), 2000)
+      toast.success(tp('toast.downloaded', { name: it.name }), { id: toastId })
+    } catch (e) {
+      console.error(e)
+      toast.error(tp('toast.download_error'), { id: toastId })
     }
-    document.body.appendChild(a); a.click(); a.remove()
-    if (it.kind === 'paper') setTimeout(() => URL.revokeObjectURL(a.href), 2000)
   }
 
   // ── Drag & drop upload ─────────────────────────────────────────────────────
@@ -423,13 +436,17 @@ export function Portefeuille() {
         </div>
         {view === 'all' && (
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => openNameDialog({ mode: 'new_folder' })} className="gap-1.5">
+            <Button size="sm" variant="outline" onClick={() => openNameDialog({ mode: 'new_folder' })} className="gap-2">
               <FolderPlus className="h-4 w-4" /> {tp('new_folder')}
             </Button>
-            <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-1.5">
+            <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-2">
               {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} {tp('upload_file')}
             </Button>
-            <Button size="sm" onClick={() => openNameDialog({ mode: 'new_paper' })} className="gap-1.5">
+            <Button
+              size="sm"
+              onClick={() => openNameDialog({ mode: 'new_paper' })}
+              className="gap-2 bg-[#0EA5E9] text-white shadow-sm transition-all hover:bg-[#0284C7] hover:shadow-md active:scale-[0.98]"
+            >
               <FilePlus2 className="h-4 w-4" /> {tp('new_paper')}
             </Button>
             <input
@@ -525,7 +542,7 @@ export function Portefeuille() {
               {visibleFolders.length > 0 && (
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">{tp('folders')}</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
                     {visibleFolders.map((f) => (
                       <FolderCard
                         key={f.id} folder={f} tp={tp}
@@ -544,7 +561,7 @@ export function Portefeuille() {
               {visibleItems.length > 0 && (
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">{tp('files')}</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
                     {visibleItems.map((it) => (
                       <ItemCard
                         key={it.id} item={it} tp={tp} lang={lang} isTrash={view === 'trash'}
@@ -567,7 +584,7 @@ export function Portefeuille() {
               {view === 'trash' && folders.filter((f) => f.is_deleted).length > 0 && (
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-2">{tp('folders')}</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]">
                     {folders.filter((f) => f.is_deleted).map((f) => (
                       <div key={f.id} className="rounded-lg border border-border p-3 flex items-center gap-2">
                         <Folder className="h-5 w-5 text-amber-500 shrink-0" />
@@ -596,25 +613,50 @@ export function Portefeuille() {
 
       {/* Name dialog (create/rename) */}
       <Dialog open={!!nameDialog} onOpenChange={(o) => { if (!o) setNameDialog(null) }}>
-        <DialogContent className="sm:max-w-sm" dir={isRTL ? 'rtl' : 'ltr'}>
-          <DialogHeader>
-            <DialogTitle>
-              {nameDialog?.mode === 'new_folder' ? tp('new_folder')
-                : nameDialog?.mode === 'new_paper' ? tp('new_paper')
-                  : tp('rename')}
-            </DialogTitle>
-          </DialogHeader>
-          <Input
-            autoFocus value={nameInput} onChange={(e) => setNameInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') submitName() }}
-            placeholder={nameDialog?.mode?.includes('folder') ? tp('folder_name') : tp('paper_name')}
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNameDialog(null)}>{tp('cancel')}</Button>
-            <Button onClick={submitName} disabled={!nameInput.trim()}>
-              {nameDialog?.mode?.startsWith('rename') ? tp('rename') : tp('create')}
-            </Button>
-          </DialogFooter>
+        <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
+          {(() => {
+            const isFolder = !!nameDialog?.mode?.includes('folder')
+            const isRename = !!nameDialog?.mode?.startsWith('rename')
+            const HeaderIcon = isRename ? Pencil : isFolder ? FolderPlus : FilePlus2
+            const title = nameDialog?.mode === 'new_folder' ? tp('new_folder')
+              : nameDialog?.mode === 'new_paper' ? tp('new_paper')
+                : tp('rename')
+            const label = isFolder ? tp('folder_name') : tp('paper_name')
+            return (
+              <>
+                <DialogHeader className="flex-row items-center gap-3 p-5 pb-4">
+                  <span className={cn(
+                    'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset',
+                    isFolder
+                      ? 'bg-amber-500/10 text-amber-600 ring-amber-500/20 dark:text-amber-400'
+                      : 'bg-primary/10 text-primary ring-primary/20',
+                  )}>
+                    <HeaderIcon className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0 space-y-0.5">
+                    <DialogTitle className="text-base">{title}</DialogTitle>
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                  </div>
+                </DialogHeader>
+                <div className="px-5 pb-5">
+                  <Input
+                    autoFocus value={nameInput} onChange={(e) => setNameInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') submitName() }}
+                    onFocus={(e) => e.currentTarget.select()}
+                    placeholder={label}
+                    className="h-11"
+                  />
+                </div>
+                <DialogFooter className="mx-0 mb-0 px-5 py-4">
+                  <Button variant="outline" onClick={() => setNameDialog(null)}>{tp('cancel')}</Button>
+                  <Button onClick={submitName} disabled={!nameInput.trim()} className="gap-1.5">
+                    <HeaderIcon className="h-4 w-4" />
+                    {isRename ? tp('rename') : tp('create')}
+                  </Button>
+                </DialogFooter>
+              </>
+            )
+          })()}
         </DialogContent>
       </Dialog>
 
@@ -644,25 +686,16 @@ export function Portefeuille() {
         </DialogContent>
       </Dialog>
 
-      {/* File preview */}
+      {/* File preview (fullscreen) */}
       <Dialog open={!!preview} onOpenChange={(o) => { if (!o) setPreview(null) }}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col" dir={isRTL ? 'rtl' : 'ltr'}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 pe-8 truncate">
-              <Eye className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">{preview?.name}</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-auto min-h-[300px] flex items-center justify-center bg-muted/30 rounded-lg">
-            {preview && <FilePreviewBody item={preview} tp={tp} />}
-          </div>
-          <DialogFooter>
-            {preview && (
-              <Button variant="outline" onClick={() => downloadItem(preview)} className="gap-1.5">
-                <Download className="h-4 w-4" /> {tp('download')}
-              </Button>
-            )}
-          </DialogFooter>
+        <DialogContent fullScreen showCloseButton={false} className="bg-background" dir={isRTL ? 'rtl' : 'ltr'}>
+          {preview && (
+            <FilePreviewViewer
+              item={preview} tp={tp}
+              onClose={() => setPreview(null)}
+              onDownload={() => downloadItem(preview)}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
@@ -700,26 +733,103 @@ export function Portefeuille() {
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
 
-function useMenu() {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!open) return
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
-  return { open, setOpen, ref }
-}
-
 function MenuItem({ icon: Icon, label, onClick, danger }: { icon: ElementType; label: string; onClick: () => void; danger?: boolean }) {
   return (
     <button
       onClick={onClick}
-      className={cn('w-full flex items-center gap-2 px-3 py-2 text-xs text-start hover:bg-muted transition-colors', danger ? 'text-rose-600 dark:text-rose-400' : 'text-popover-foreground')}
+      className={cn(
+        'w-full flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs text-start transition-colors',
+        danger
+          ? 'text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10'
+          : 'text-popover-foreground hover:bg-muted',
+      )}
     >
-      <Icon className="h-3.5 w-3.5" /> {label}
+      <Icon className="h-3.5 w-3.5 shrink-0" /> {label}
     </button>
+  )
+}
+
+/**
+ * A dropdown menu whose panel is rendered in a portal (document.body) so it is
+ * never clipped by a parent with `overflow-hidden` (e.g. the Card). It positions
+ * itself under the trigger and flips upward when there isn't enough room below.
+ */
+function CardMenu({ width = 176, children }: { width?: number; children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number; placement: 'top' | 'bottom' }>({ top: 0, left: 0, placement: 'bottom' })
+  const isRTL = document.documentElement.dir === 'rtl'
+
+  const place = useCallback(() => {
+    const btn = triggerRef.current
+    if (!btn) return
+    const r = btn.getBoundingClientRect()
+    const panelH = panelRef.current?.offsetHeight ?? 240
+    const gap = 4
+    const spaceBelow = window.innerHeight - r.bottom
+    const placement: 'top' | 'bottom' = spaceBelow < panelH + gap && r.top > panelH + gap ? 'top' : 'bottom'
+    const top = placement === 'bottom' ? r.bottom + gap : r.top - panelH - gap
+    // Align the panel's inner edge with the trigger, keep within viewport.
+    let left = isRTL ? r.left : r.right - width
+    left = Math.max(8, Math.min(left, window.innerWidth - width - 8))
+    setPos({ top, left, placement })
+  }, [width, isRTL])
+
+  useLayoutEffect(() => {
+    if (open) place()
+  }, [open, place])
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => {
+      if (triggerRef.current?.contains(e.target as Node)) return
+      if (panelRef.current?.contains(e.target as Node)) return
+      setOpen(false)
+    }
+    const onScrollOrResize = () => place()
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    window.addEventListener('scroll', onScrollOrResize, true)
+    window.addEventListener('resize', onScrollOrResize)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      window.removeEventListener('scroll', onScrollOrResize, true)
+      window.removeEventListener('resize', onScrollOrResize)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open, place])
+
+  return (
+    <div className="absolute top-1.5 end-1.5">
+      <button
+        ref={triggerRef}
+        onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
+        className={cn(
+          'p-1 rounded-md text-muted-foreground transition-all hover:bg-muted hover:text-foreground',
+          open ? 'opacity-100 bg-muted' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+        )}
+      >
+        <MoreVertical className="h-4 w-4" />
+      </button>
+      {open && createPortal(
+        <div
+          ref={panelRef}
+          onClick={(e) => { e.stopPropagation(); setOpen(false) }}
+          style={{ position: 'fixed', top: pos.top, left: pos.left, width }}
+          className={cn(
+            'z-[100] rounded-lg border border-border bg-popover p-1 shadow-lg',
+            'origin-top data-[placement=top]:origin-bottom',
+            'animate-in fade-in-0 zoom-in-95 duration-100',
+          )}
+          data-placement={pos.placement}
+        >
+          {children}
+        </div>,
+        document.body,
+      )}
+    </div>
   )
 }
 
@@ -728,31 +838,27 @@ interface FolderCardProps {
   onOpen: Cb; onRename: Cb; onDelete: Cb; onMove: Cb; onFav: Cb
 }
 const FolderCard: FC<FolderCardProps> = ({ folder, tp, onOpen, onRename, onDelete, onMove, onFav }) => {
-  const menu = useMenu()
   return (
-    <div className="group relative rounded-lg border border-border bg-card hover:border-primary/40 hover:shadow-sm transition-all">
-      <button onClick={onOpen} className="w-full flex items-center gap-2.5 p-3 text-start">
-        <span className="flex h-9 w-9 items-center justify-center rounded-md bg-amber-50 dark:bg-amber-500/10 shrink-0">
+    <div className="group relative rounded-xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5">
+      <button onClick={onOpen} className="w-full flex items-center gap-3 p-3 pe-9 text-start">
+        <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 ring-1 ring-inset ring-amber-500/15 dark:bg-amber-500/10 shrink-0">
           <Folder className="h-5 w-5 text-amber-500" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-foreground truncate">{folder.name}</span>
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            <span className="truncate">{folder.name}</span>
+            {folder.is_favorite ? <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" /> : null}
+          </span>
+          <span className="block text-[11px] text-muted-foreground">{tp('folders').replace(/s$/i, '')}</span>
         </span>
       </button>
-      {folder.is_favorite ? <Star className="absolute top-2 end-9 h-3.5 w-3.5 fill-amber-400 text-amber-400" /> : null}
-      <div ref={menu.ref} className="absolute top-1.5 end-1.5">
-        <button onClick={() => menu.setOpen((o) => !o)} className="p-1 rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition-all">
-          <MoreVertical className="h-4 w-4" />
-        </button>
-        {menu.open && (
-          <div className="absolute end-0 top-full mt-1 z-30 w-40 rounded-md border border-border bg-popover shadow-lg overflow-hidden py-1">
-            <MenuItem icon={Star} label={folder.is_favorite ? tp('unfavorite') : tp('favorite')} onClick={() => { menu.setOpen(false); onFav() }} />
-            <MenuItem icon={Pencil} label={tp('rename')} onClick={() => { menu.setOpen(false); onRename() }} />
-            <MenuItem icon={Move} label={tp('move')} onClick={() => { menu.setOpen(false); onMove() }} />
-            <MenuItem icon={Trash2} label={tp('delete')} danger onClick={() => { menu.setOpen(false); onDelete() }} />
-          </div>
-        )}
-      </div>
+      <CardMenu width={176}>
+        <MenuItem icon={Star} label={folder.is_favorite ? tp('unfavorite') : tp('favorite')} onClick={onFav} />
+        <MenuItem icon={Pencil} label={tp('rename')} onClick={onRename} />
+        <MenuItem icon={Move} label={tp('move')} onClick={onMove} />
+        <div className="my-1 h-px bg-border" />
+        <MenuItem icon={Trash2} label={tp('delete')} danger onClick={onDelete} />
+      </CardMenu>
     </div>
   )
 }
@@ -763,53 +869,169 @@ interface ItemCardProps {
   onDelete: Cb; onMove: Cb; onFav: Cb; onRestore: Cb; onPurge: Cb
 }
 const ItemCard: FC<ItemCardProps> = ({ item, tp, lang, isTrash, onOpen, onPreview, onDownload, onRename, onDelete, onMove, onFav, onRestore, onPurge }) => {
-  const menu = useMenu()
   const ext = item.file_ext || ''
   const Icon = item.kind === 'paper' ? FileText : iconForExt(ext)
   const tone = item.kind === 'paper'
-    ? 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400'
-    : ['pdf'].includes(ext) ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
-      : ['xls', 'xlsx', 'csv'].includes(ext) ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
-        : ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext) ? 'bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400'
-          : 'bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-300'
+    ? 'bg-sky-50 text-sky-600 ring-sky-500/15 dark:bg-sky-500/10 dark:text-sky-400'
+    : ['pdf'].includes(ext) ? 'bg-rose-50 text-rose-600 ring-rose-500/15 dark:bg-rose-500/10 dark:text-rose-400'
+      : ['xls', 'xlsx', 'csv'].includes(ext) ? 'bg-emerald-50 text-emerald-600 ring-emerald-500/15 dark:bg-emerald-500/10 dark:text-emerald-400'
+        : ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext) ? 'bg-violet-50 text-violet-600 ring-violet-500/15 dark:bg-violet-500/10 dark:text-violet-400'
+          : 'bg-slate-100 text-slate-600 ring-slate-500/15 dark:bg-white/5 dark:text-slate-300'
 
   return (
-    <div className="group relative rounded-lg border border-border bg-card hover:border-primary/40 hover:shadow-sm transition-all">
-      <button onClick={isTrash ? undefined : onOpen} disabled={isTrash} className="w-full flex items-center gap-2.5 p-3 text-start disabled:cursor-default">
-        <span className={cn('flex h-9 w-9 items-center justify-center rounded-md shrink-0', tone)}>
+    <div className={cn(
+      'group relative rounded-xl border border-border bg-card transition-all hover:border-primary/40 hover:shadow-md',
+      !isTrash && 'hover:-translate-y-0.5',
+    )}>
+      <button onClick={isTrash ? undefined : onOpen} disabled={isTrash} className="w-full flex items-center gap-3 p-3 pe-9 text-start disabled:cursor-default">
+        <span className={cn('flex h-10 w-10 items-center justify-center rounded-lg ring-1 ring-inset shrink-0', tone)}>
           <Icon className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-foreground truncate">{item.name}</span>
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            <span className="truncate">{item.name}</span>
+            {item.is_favorite ? <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" /> : null}
+          </span>
           <span className="block text-[11px] text-muted-foreground truncate">
             {item.kind === 'paper' ? tp('kind_paper') : `${(ext || '').toUpperCase()} · ${formatBytes(item.size_bytes)}`}
             {' · '}{formatDate(item.updated_at, 'dd/MM/yy', lang)}
           </span>
         </span>
       </button>
-      {item.is_favorite ? <Star className="absolute top-2 end-9 h-3.5 w-3.5 fill-amber-400 text-amber-400" /> : null}
-      <div ref={menu.ref} className="absolute top-1.5 end-1.5">
-        <button onClick={() => menu.setOpen((o) => !o)} className="p-1 rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition-all">
-          <MoreVertical className="h-4 w-4" />
-        </button>
-        {menu.open && (
-          <div className="absolute end-0 top-full mt-1 z-30 w-44 rounded-md border border-border bg-popover shadow-lg overflow-hidden py-1">
-            {isTrash ? (
-              <>
-                <MenuItem icon={RotateCcw} label={tp('restore')} onClick={() => { menu.setOpen(false); onRestore() }} />
-                <MenuItem icon={Trash2} label={tp('delete_permanently')} danger onClick={() => { menu.setOpen(false); onPurge() }} />
-              </>
-            ) : (
-              <>
-                {item.kind === 'file' && <MenuItem icon={Eye} label={tp('preview')} onClick={() => { menu.setOpen(false); onPreview() }} />}
-                {item.kind === 'paper' && <MenuItem icon={Eye} label={tp('open')} onClick={() => { menu.setOpen(false); onOpen() }} />}
-                <MenuItem icon={Download} label={tp('download')} onClick={() => { menu.setOpen(false); onDownload() }} />
-                <MenuItem icon={Star} label={item.is_favorite ? tp('unfavorite') : tp('favorite')} onClick={() => { menu.setOpen(false); onFav() }} />
-                <MenuItem icon={Pencil} label={tp('rename')} onClick={() => { menu.setOpen(false); onRename() }} />
-                <MenuItem icon={Move} label={tp('move')} onClick={() => { menu.setOpen(false); onMove() }} />
-                <MenuItem icon={Trash2} label={tp('delete')} danger onClick={() => { menu.setOpen(false); onDelete() }} />
-              </>
-            )}
+      <CardMenu width={isTrash ? 200 : 180}>
+        {isTrash ? (
+          <>
+            <MenuItem icon={RotateCcw} label={tp('restore')} onClick={onRestore} />
+            <MenuItem icon={Trash2} label={tp('delete_permanently')} danger onClick={onPurge} />
+          </>
+        ) : (
+          <>
+            {item.kind === 'file' && <MenuItem icon={Eye} label={tp('preview')} onClick={onPreview} />}
+            {item.kind === 'paper' && <MenuItem icon={Eye} label={tp('open')} onClick={onOpen} />}
+            <MenuItem icon={Download} label={tp('download')} onClick={onDownload} />
+            <MenuItem icon={Star} label={item.is_favorite ? tp('unfavorite') : tp('favorite')} onClick={onFav} />
+            <MenuItem icon={Pencil} label={tp('rename')} onClick={onRename} />
+            <MenuItem icon={Move} label={tp('move')} onClick={onMove} />
+            <div className="my-1 h-px bg-border" />
+            <MenuItem icon={Trash2} label={tp('delete')} danger onClick={onDelete} />
+          </>
+        )}
+      </CardMenu>
+    </div>
+  )
+}
+
+type PreviewCb = () => void
+
+function FilePreviewViewer({ item, tp, onClose, onDownload }: {
+  item: Item; tp: (k: string, o?: any) => string; onClose: PreviewCb; onDownload: PreviewCb
+}) {
+  const content = item.content || ''
+  const ext = (item.file_ext || '').toLowerCase()
+  const mime = item.mime_type || ''
+  const isImage = item.kind === 'file' && (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext))
+  const isSpreadsheet = item.kind === 'file' && (['xlsx', 'xls', 'xlsm', 'xlsb', 'csv', 'ods'].includes(ext) || /(spreadsheetml|ms-excel|opendocument.spreadsheet|csv)/.test(mime))
+  const isWide = isSpreadsheet || ext === 'pdf' || mime === 'application/pdf'
+
+  const [zoom, setZoom] = useState(1)
+  const [rotate, setRotate] = useState(0)
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
+
+  const MIN = 0.25, MAX = 6
+  const clamp = (z: number) => Math.min(MAX, Math.max(MIN, z))
+  const zoomIn = useCallback(() => setZoom((z) => clamp(+(z + 0.25).toFixed(2))), [])
+  const zoomOut = useCallback(() => setZoom((z) => clamp(+(z - 0.25).toFixed(2))), [])
+  const reset = useCallback(() => { setZoom(1); setOffset({ x: 0, y: 0 }); setRotate(0) }, [])
+
+  // Keyboard shortcuts for image zoom.
+  useEffect(() => {
+    if (!isImage) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomIn() }
+      else if (e.key === '-' || e.key === '_') { e.preventDefault(); zoomOut() }
+      else if (e.key === '0') { e.preventDefault(); reset() }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isImage, zoomIn, zoomOut, reset])
+
+  const onWheel = (e: ReactWheelEvent) => {
+    if (!isImage) return
+    setZoom((z) => clamp(+(z - Math.sign(e.deltaY) * 0.15).toFixed(2)))
+  }
+
+  const onPointerDown = (e: ReactPointerEvent) => {
+    if (!isImage || zoom <= 1) return
+    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    dragRef.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y }
+  }
+  const onPointerMove = (e: ReactPointerEvent) => {
+    if (!dragRef.current) return
+    setOffset({ x: dragRef.current.ox + (e.clientX - dragRef.current.x), y: dragRef.current.oy + (e.clientY - dragRef.current.y) })
+  }
+  const onPointerUp = () => { dragRef.current = null }
+
+  return (
+    <div className="flex h-full flex-col bg-background">
+      {/* Header toolbar */}
+      <div className="flex items-center gap-2 border-b border-border px-3 py-2.5 sm:px-4">
+        <Eye className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <DialogTitle className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{item.name}</DialogTitle>
+
+        {isImage && (
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
+            <button onClick={zoomOut} disabled={zoom <= MIN} title={tp('zoom_out')} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40">
+              <ZoomOut className="h-4 w-4" />
+            </button>
+            <button onClick={reset} title={tp('zoom_reset')} className="min-w-[52px] rounded-md px-1 text-xs font-medium tabular-nums text-foreground transition-colors hover:bg-muted">
+              {Math.round(zoom * 100)}%
+            </button>
+            <button onClick={zoomIn} disabled={zoom >= MAX} title={tp('zoom_in')} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40">
+              <ZoomIn className="h-4 w-4" />
+            </button>
+            <div className="mx-0.5 h-5 w-px bg-border" />
+            <button onClick={() => setRotate((r) => (r + 90) % 360)} title={tp('rotate')} className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              <RotateCw className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        <Button size="sm" onClick={onDownload} className="gap-1.5">
+          <Download className="h-4 w-4" /> <span className="hidden sm:inline">{tp('download')}</span>
+        </Button>
+        <Button variant="ghost" size="icon-sm" onClick={onClose} title={tp('close') || 'Close'}>
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Preview surface */}
+      <div
+        className="relative flex-1 overflow-hidden bg-muted/20"
+        onWheel={onWheel}
+      >
+        {isImage ? (
+          <div
+            className="flex h-full w-full items-center justify-center select-none"
+            style={{ cursor: zoom > 1 ? (dragRef.current ? 'grabbing' : 'grab') : 'default' }}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerLeave={onPointerUp}
+            onDoubleClick={() => (zoom === 1 ? setZoom(2) : reset())}
+          >
+            <img
+              src={content} alt={item.name} draggable={false}
+              className="max-h-full max-w-full object-contain transition-transform duration-100"
+              style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom}) rotate(${rotate}deg)` }}
+            />
+          </div>
+        ) : (
+          <div className={cn(
+            'mx-auto flex h-full w-full overflow-auto p-4',
+            isWide ? 'max-w-none' : 'max-w-5xl items-center justify-center',
+          )}>
+            <FilePreviewBody item={item} tp={tp} />
           </div>
         )}
       </div>
@@ -823,23 +1045,127 @@ function FilePreviewBody({ item, tp }: { item: Item; tp: (k: string, o?: any) =>
   const mime = item.mime_type || ''
 
   if (item.kind === 'paper') {
-    return <div className="w-full h-full bg-white text-black p-6 overflow-auto" dangerouslySetInnerHTML={{ __html: content }} />
-  }
-  if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(ext)) {
-    return <img src={content} alt={item.name} className="max-w-full max-h-[70vh] object-contain" />
+    return <div className="w-full h-full bg-white text-black p-6 overflow-auto rounded-lg shadow-sm" dangerouslySetInnerHTML={{ __html: content }} />
   }
   if (ext === 'pdf' || mime === 'application/pdf') {
-    return <iframe src={content} title={item.name} className="w-full h-[70vh] rounded-lg border-0" />
+    return <iframe src={content} title={item.name} className="w-full h-full min-h-[70vh] rounded-lg border-0 bg-white" />
   }
-  if (['txt', 'csv'].includes(ext) || mime.startsWith('text/')) {
+  const isSpreadsheet = ['xlsx', 'xls', 'xlsm', 'xlsb', 'csv', 'ods'].includes(ext)
+    || /(spreadsheetml|ms-excel|opendocument.spreadsheet|csv)/.test(mime)
+  if (isSpreadsheet) {
+    return <SpreadsheetPreview item={item} tp={tp} />
+  }
+  if (['txt'].includes(ext) || mime.startsWith('text/')) {
     let text = ''
     try { text = atob((content.split(',')[1] || '')) } catch { text = '' }
-    return <pre className="w-full h-full max-h-[70vh] overflow-auto p-4 text-xs text-foreground whitespace-pre-wrap bg-card">{text}</pre>
+    return <pre className="w-full h-full overflow-auto p-4 text-xs text-foreground whitespace-pre-wrap bg-card rounded-lg">{text}</pre>
   }
   return (
     <div className="flex flex-col items-center gap-2 text-muted-foreground py-10">
       <FileIcon className="h-10 w-10 opacity-40" />
       <p className="text-sm">{tp('no_preview')}</p>
+    </div>
+  )
+}
+
+function dataUrlToUint8Array(dataUrl: string): Uint8Array | null {
+  try {
+    const base64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl
+    const binary = atob(base64)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    return bytes
+  } catch {
+    return null
+  }
+}
+
+function SpreadsheetPreview({ item, tp }: { item: Item; tp: (k: string, o?: any) => string }) {
+  const [wb, setWb] = useState<XLSX.WorkBook | null>(null)
+  const [active, setActive] = useState(0)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    setWb(null); setError(false); setActive(0)
+    const bytes = dataUrlToUint8Array(item.content || '')
+    if (!bytes) { setError(true); return }
+    try {
+      const parsed = XLSX.read(bytes, { type: 'array' })
+      setWb(parsed)
+    } catch {
+      setError(true)
+    }
+  }, [item.content, item.id])
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-2 text-muted-foreground py-10">
+        <FileSpreadsheet className="h-10 w-10 opacity-40" />
+        <p className="text-sm">{tp('no_preview')}</p>
+      </div>
+    )
+  }
+  if (!wb) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    )
+  }
+
+  const sheetName = wb.SheetNames[active] ?? wb.SheetNames[0]
+  const sheet = wb.Sheets[sheetName]
+  const rows: string[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false, defval: '' })
+
+  return (
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border border-border bg-card">
+      <div className="flex-1 overflow-auto">
+        <table className="w-full border-collapse text-xs">
+          <tbody>
+            {rows.length === 0 ? (
+              <tr><td className="p-4 text-muted-foreground">{tp('no_preview')}</td></tr>
+            ) : rows.map((row, ri) => (
+              <tr key={ri} className={ri === 0 ? 'sticky top-0 z-10' : ''}>
+                <td className={cn(
+                  'sticky start-0 z-10 min-w-[40px] border border-border bg-muted px-2 py-1 text-center font-mono text-[10px] text-muted-foreground',
+                  ri === 0 && 'z-20',
+                )}>
+                  {ri + 1}
+                </td>
+                {row.map((cell, ci) => (
+                  <td
+                    key={ci}
+                    className={cn(
+                      'max-w-[320px] truncate border border-border px-2.5 py-1.5',
+                      ri === 0 ? 'bg-emerald-50 font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300' : 'text-foreground',
+                    )}
+                    title={String(cell ?? '')}
+                  >
+                    {String(cell ?? '')}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {wb.SheetNames.length > 1 && (
+        <div className="flex shrink-0 items-center gap-1 overflow-x-auto border-t border-border bg-muted/40 px-2 py-1.5">
+          {wb.SheetNames.map((name, i) => (
+            <button
+              key={name}
+              onClick={() => setActive(i)}
+              className={cn(
+                'shrink-0 rounded-md px-3 py-1 text-xs font-medium transition-colors',
+                i === active ? 'bg-emerald-600 text-white' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
